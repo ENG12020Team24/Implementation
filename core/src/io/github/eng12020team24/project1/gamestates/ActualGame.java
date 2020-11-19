@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.Vector2;
 import io.github.eng12020team24.project1.characters.Beam;
 import io.github.eng12020team24.project1.mapclasses.TileType;
 import io.github.eng12020team24.project1.mapclasses.TiledGameMap;
@@ -17,12 +16,10 @@ import io.github.eng12020team24.project1.pathfinding.TileGraph;
 import io.github.eng12020team24.project1.characters.Auber;
 import io.github.eng12020team24.project1.characters.Infiltrator;
 import io.github.eng12020team24.project1.characters.NeutralNPC;
-import io.github.eng12020team24.project1.characters.character_utils;
 import io.github.eng12020team24.project1.system.StationSystem;
 import io.github.eng12020team24.project1.ui.HealthBar;
 import io.github.eng12020team24.project1.ui.Minimap;
 
-import java.util.ArrayList;
 
 public class ActualGame implements Screen {
     final AuberGame game;
@@ -89,7 +86,7 @@ public class ActualGame implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         elapsedTime += Gdx.graphics.getDeltaTime();
 
-        auber.move(Gdx.graphics.getDeltaTime());
+        auber.move(Gdx.graphics.getDeltaTime(), infiltrators);
         camera.position.set(auber.getPositionForCamera());
         camera.update();
         gameMap.render(camera);
@@ -134,6 +131,7 @@ public class ActualGame implements Screen {
         }
 
         ArrayList<Beam> beamsToRemove = new ArrayList<Beam>();
+        ArrayList<Infiltrator> infiltratorsToRemove = new ArrayList<Infiltrator>();
         for (Beam beam : beamgun) {
             beam.render(game.batch, camera);
             beam.move();
@@ -141,6 +139,12 @@ public class ActualGame implements Screen {
             if (gameMap.doesRectCollideWithMap(beam.getX() + 8, beam.getY() + 8, 16, 16)) {
                 // +8 as the beam orb sprite is 16x16 surrounded by an 8-wide border
                 beamsToRemove.add(beam);
+            } else {
+                for (Infiltrator infiltrator : infiltrators) {
+                    if (infiltrator.doesRectCollideWithInfiltrator(beam.getX() + 8, beam.getY() + 8, 16, 16)) {
+                        infiltratorsToRemove.add(infiltrator);
+                    }
+                }
             }
         }
 
@@ -148,6 +152,9 @@ public class ActualGame implements Screen {
             beamgun.remove(b);
         }
 
+        for (Infiltrator i : infiltratorsToRemove) {
+            infiltrators.remove(i);
+        }
 
 
         game.batch.end();
